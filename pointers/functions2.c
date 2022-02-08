@@ -2,6 +2,7 @@
 
 void f2(int *p)
 {
+    /* by passing in &x, we are essentially saying: p = &x */
     printf("at start of f2: &p=%p\n", &p); 
     printf("at start of f2: p=%p\n", p); 
     printf("at start of f2: *p=%i\n", *p); 
