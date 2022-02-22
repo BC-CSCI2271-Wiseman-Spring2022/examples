@@ -28,14 +28,14 @@ int main()
     buf[size] = '\0';
     printf("Read %i bytes: %s", size, buf);
 
-    size = read(fd, buf, BUF_SIZE);
-    if(size < 0)
+    int size2 = read(fd, buf, BUF_SIZE);
+    if(size2 < 0)
     {
         perror("read");
         exit(1);
     }
-    buf[size] = '\0';
-    printf("Read %i bytes: %s", size, buf);
+    buf[size2] = '\0';
+    printf("Read %i bytes: %s", size2, buf);
 
     if (close(fd) < 0)
     {
