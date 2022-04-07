@@ -35,7 +35,6 @@ void *simple_malloc(size_t size)
     // if we have no memory, grab one chunk to start
     if (mbegin == NULL)
     {
-        //mbegin = (char *)sbrk(HEAP_CHUNK_SIZE);
         mbegin = sbrk(HEAP_CHUNK_SIZE);
         if (mbegin == (void *)-1)
         {
@@ -51,7 +50,6 @@ void *simple_malloc(size_t size)
     // if the request is for more memory that we have, get enough to fulfill it
     if (size > (mend - mbegin))
     {
-        //mend = (char *)sbrk(((size/4096)+1)*4096);
         mend = sbrk(((size/HEAP_CHUNK_SIZE)+1)*HEAP_CHUNK_SIZE);
         if (mend == (void *)-1)
         {
