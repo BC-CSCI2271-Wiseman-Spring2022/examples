@@ -40,7 +40,7 @@ void *simple_malloc(size_t size)
         {
             return NULL;
         }
-        mend = mbegin + HEAP_CHUNK_SIZE;
+        mend = sbrk(0);
 
         // skip the first 8 bytes so that we will return 16-byte aligned
         // addresses, after we put our 8 bytes of bookkeeping in front
@@ -50,11 +50,12 @@ void *simple_malloc(size_t size)
     // if the request is for more memory that we have, get enough to fulfill it
     if (size > (mend - mbegin))
     {
-        mend = sbrk(((size/HEAP_CHUNK_SIZE)+1)*HEAP_CHUNK_SIZE);
-        if (mend == (void *)-1)
+        void *tmp = sbrk(((size/HEAP_CHUNK_SIZE)+1)*HEAP_CHUNK_SIZE);
+        if (tmp == (void *)-1)
         {
             return NULL;
         }
+        mend = sbrk(0);
     }
 
     // return the front of this memory chunk to the user
