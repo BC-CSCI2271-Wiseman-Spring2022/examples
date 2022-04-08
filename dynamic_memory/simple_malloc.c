@@ -3,10 +3,10 @@
 #define HEAP_CHUNK_SIZE 4096
 
 // track beginning of memory available from sbrk()
-void *mbegin = NULL;
+void *heap_begin = NULL;
 
-// track end of memory available from sbrk()
-void *mend = NULL;
+// track how many memory is left in our current heap allocation
+size_t available_bytes = 0;
 
 /* allocate size bytes from the heap */
 void *simple_malloc(size_t size)
@@ -33,43 +33,46 @@ void *simple_malloc(size_t size)
     }
 
     // if we have no memory, grab one chunk to start
-    if (mbegin == NULL)
+    if (heap_begin == NULL)
     {
-        mbegin = sbrk(HEAP_CHUNK_SIZE);
-        if (mbegin == (void *)-1)
+        heap_begin = sbrk(HEAP_CHUNK_SIZE);
+        if (heap_begin == (void *)-1)
         {
             return NULL;
         }
-        mend = sbrk(0);
 
         // skip the first 8 bytes so that we will return 16-byte aligned
         // addresses, after we put our 8 bytes of bookkeeping in front
-        mbegin += 8;
+        heap_begin += 8;
+        available_bytes = HEAP_CHUNK_SIZE - 8;
     }
 
     // if the request is for more memory that we have, get enough to fulfill it
-    if (size > (mend - mbegin))
+    if (size > available_bytes)
     {
-        void *tmp = sbrk(((size/HEAP_CHUNK_SIZE)+1)*HEAP_CHUNK_SIZE);
+        size_t needed_bytes = size - available_bytes;
+        int total_new_bytes = ((needed_bytes/HEAP_CHUNK_SIZE)+1)*HEAP_CHUNK_SIZE;
+        void *tmp = sbrk(total_new_bytes);
         if (tmp == (void *)-1)
         {
             return NULL;
         }
-        mend = sbrk(0);
+        available_bytes += total_new_bytes;
     }
 
     // return the front of this memory chunk to the user
 
     // first, write the size of the chunk to first 8 bytes
-    size_t *tmp = (size_t *)mbegin;
+    size_t *tmp = (size_t *)heap_begin;
     *tmp = size;
 
     // second, set the address for the user to be 8 bytes where the size starts
     void *returned_ptr;
-    returned_ptr = mbegin + 8;
+    returned_ptr = heap_begin + 8;
 
-    // update mbegin as size bytes have now been allocated to the application
-    mbegin += size;
+    // update heap_begin as size bytes have now been allocated to the application
+    heap_begin += size;
+    available_bytes -= size;
 
     // give the address back to the application
     return returned_ptr;
