@@ -66,7 +66,7 @@ void *simple_malloc(size_t size)
     size_t *tmp = (size_t *)heap_begin;
     *tmp = size;
 
-    // second, set the address for the user to be 8 bytes where the size starts
+    // second, set the address for the user to be 8 bytes after the size
     void *returned_ptr;
     returned_ptr = heap_begin + 8;
 
