@@ -3,14 +3,14 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <dirent.h>
 
 int find_size(char *dir)
 {
     int size = 0;
-    struct stat finfo;
-    struct dirent *de;
 
+    struct dirent *de;
     DIR *d = opendir(dir);
     if (d == NULL)
     {
@@ -25,18 +25,16 @@ int find_size(char *dir)
             continue;
         }
 
-        if (stat(de->d_name, &finfo) != 0)
+        struct stat finfo;
+        if (stat(de->d_name, &finfo) == -1)
         {
             perror(de->d_name);
             continue;
         }
 
-        if (S_ISDIR(finfo.st_mode))
-        {
-            size += find_size(de->d_name);
-        }
         size += finfo.st_size;
     }
+
     if (closedir(d) != 0)
     {
         perror("closedir");
@@ -47,6 +45,7 @@ int find_size(char *dir)
 
 int main()
 {
-    printf("%d\n", find_size("."));
+    int total = find_size(".");
+    printf("%i\n", total);
     return 0;
 }

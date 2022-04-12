@@ -1,21 +1,21 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
-    struct stat finfo;
-
     for (int i=1; i<argc; ++i)
     {
-        if (stat(argv[i], &finfo) == 0)
+        struct stat finfo;
+        if (stat(argv[i], &finfo) == -1)
         {
-            printf("%s %li\n", argv[i], finfo.st_size);
+            perror(argv[i]);
+            continue;
         }
-        else
-        {
-            printf("%s: file not found\n", argv[i]);
-        }
+
+        printf("%s %li\n", argv[i], finfo.st_size);
     }
     return 0;
 }

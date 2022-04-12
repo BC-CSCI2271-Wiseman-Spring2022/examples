@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#define NUM_ADDRS 10
+#define NUM_ADDRS 20
 
 int main(int argc, char **argv)
 {

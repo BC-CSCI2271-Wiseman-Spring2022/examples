@@ -3,30 +3,30 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <dirent.h>
 
 #include "sorted_list.h"
 
 int main()
 {
-    node *file_names = NULL;
-    int max_length = 0;
-    struct stat finfo;
-    struct dirent *de;
+    int longest_name_length = 0;
+    node *filenames = NULL;
 
+    struct dirent *de;
     DIR *d = opendir(".");
-    if (d == NULL) {
-        perror("Couldn't open .");
+    if (d == NULL)
+    {
+        perror("opendir");
         exit(1);
     }
 
     for (de = readdir(d); de != NULL; de = readdir(d))
     {
-        add_node(&file_names, strdup(de->d_name));
-        int file_name_len = strlen(de->d_name);
-        if (file_name_len > max_length)
+        add_node(&filenames, strdup(de->d_name));
+        if (strlen(de->d_name) > longest_name_length)
         {
-            max_length = file_name_len;
+            longest_name_length = strlen(de->d_name);
         }
     }
 
@@ -35,29 +35,32 @@ int main()
         perror("closedir");
     }
 
-    for (node *cur = file_names; cur != NULL; cur = cur->next)
+    node *filename = filenames;
+    while (filename != NULL)
     {
-        if (stat(cur->value, &finfo) != 0)
+        struct stat finfo;
+        if (stat(filename->value, &finfo) == -1)
         {
-            printf("%s: file not found\n", de->d_name);
+            perror(filename->value);
             continue;
         }
 
-        printf("%*s %li", -max_length, cur->value, finfo.st_size);
+        printf("%*s %li", -longest_name_length, filename->value, finfo.st_size);
+
         if (S_ISDIR(finfo.st_mode))
         {
             printf(" (directory)");
         }
-        else if (S_ISREG(finfo.st_mode))
+        else if ((S_ISREG(finfo.st_mode) && (finfo.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH))))
         {
-            if (finfo.st_mode & (S_IXUSR|S_IXGRP|S_IXOTH))
-            {
-                printf(" (executable)");
-            }
+            printf(" (executable)");
         }
         printf("\n");
+
+        filename = filename->next;
     }
 
-    free_list(&file_names);
+    free_list(&filenames);
+
     return 0;
 }

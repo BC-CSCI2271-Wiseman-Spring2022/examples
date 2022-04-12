@@ -3,24 +3,14 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <unistd.h>
 #include <dirent.h>
-
-char *build_path(char *dir, char *file)
-{
-    int path_length = strlen(dir) + 1 + strlen(file) + 1;
-    char *full_path = (char *)malloc(path_length*sizeof(char));
-    strcpy(full_path, dir);
-    strcat(full_path, "/");
-    strcat(full_path, file);
-    return full_path;
-}
 
 int find_size(char *dir)
 {
     int size = 0;
-    struct stat finfo;
-    struct dirent *de;
 
+    struct dirent *de;
     DIR *d = opendir(dir);
     if (d == NULL)
     {
@@ -28,6 +18,7 @@ int find_size(char *dir)
         exit(1);
     }
 
+    printf("Processing directory: %s\n", dir);
     for (de = readdir(d); de != NULL; de = readdir(d))
     {
         if (strcmp(de->d_name, "..") == 0)
@@ -35,22 +26,33 @@ int find_size(char *dir)
             continue;
         }
 
-        char *full_path = build_path(dir, de->d_name);
-        if (stat(full_path, &finfo) != 0)
+        int new_length = strlen(dir) + 1 + strlen(de->d_name) + 1;
+        char *path = (char *)malloc(new_length * sizeof(char));
+        strcpy(path, dir);
+        strcat(path, "/");
+        strcat(path, de->d_name);
+
+        struct stat finfo;
+        if (stat(path, &finfo) == -1)
         {
-            perror(full_path);
-            free(full_path);
+            perror(path);
+            free(path);
             continue;
         }
 
-        printf("Checking %s\n", full_path);
-        if (S_ISDIR(finfo.st_mode) && (strcmp(de->d_name, ".") != 0))
+        printf("Processing file: %s\n", path);
+        if (S_ISDIR(finfo.st_mode) && strcmp(de->d_name, ".") != 0)
         {
-            size += find_size(full_path);
+            size += find_size(path);
         }
-        size += finfo.st_size;
-        free(full_path);
+        else
+        {
+            size += finfo.st_size;
+        }
+
+        free(path);
     }
+
     if (closedir(d) != 0)
     {
         perror("closedir");
@@ -61,6 +63,7 @@ int find_size(char *dir)
 
 int main()
 {
-    printf("%d\n", find_size("."));
+    int total = find_size(".");
+    printf("%i\n", total);
     return 0;
 }

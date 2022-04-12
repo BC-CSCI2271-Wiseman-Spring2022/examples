@@ -11,10 +11,12 @@ int main()
 
     printf("sbrk(0) = %p\n", sbrk(0));
 
+    /*
     int *dynvar2 = (int *)malloc(sizeof(int));
     printf("dynvar2 = %p\n", dynvar2);
 
     printf("sbrk(0) = %p\n", sbrk(0));
+    */
 
     return 0;
 }

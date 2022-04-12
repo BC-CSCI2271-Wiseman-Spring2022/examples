@@ -10,6 +10,7 @@ int main()
     add_node(&head, 8);
     add_node(&head, 32);
     add_node(&head, 4);
+    add_node(&head, 128);
 
     print_list(head);
     free_list(&head);
