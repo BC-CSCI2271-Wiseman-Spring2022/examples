@@ -66,9 +66,9 @@ int main()
     // in the parent
     
     // wait on the child to exit
-    if (wait(NULL) == -1)
+    if (waitpid(fork_rv, NULL, 0) == -1)
     {
-        perror("wait");
+        perror("waitpid");
         exit(1);
     }
 
