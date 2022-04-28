@@ -3,7 +3,6 @@
 void probe(unsigned long *addr, int offset)
 {
     unsigned long *cur;
-    //for (cur = addr-offset; cur <= addr+1; cur += 1)
     for (cur = addr+offset; cur >= addr-1; cur -= 1)
     {
         printf("addr: %p, ", cur);
